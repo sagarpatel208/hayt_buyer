@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "523385812998",
+    "firebase_url": "https://hayt-buyer.firebaseio.com",
+    "project_id": "hayt-buyer",
+    "storage_bucket": "hayt-buyer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523385812998:android:191ff2639d1a3d2eedab87",
+        "android_client_info": {
+          "package_name": "com.hayt_buyer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "523385812998-thlpliocrk5ohkgof6uofrm2dc0shnni.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKPZbZufHpHf7gkZPbLpS8ObuFsh5Yg_s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "523385812998-thlpliocrk5ohkgof6uofrm2dc0shnni.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
