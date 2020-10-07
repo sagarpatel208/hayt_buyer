@@ -1,4 +1,3 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:hayt_buyer/Common/Constants.dart' as cnst;
 
@@ -11,14 +10,11 @@ class ImageView extends StatefulWidget {
 }
 
 class _ImageViewState extends State<ImageView> {
-  int index;
+  PageController controller;
   @override
   void initState() {
     int ind = widget.images.indexOf(widget.image);
-    print("img: ${ind}");
-    setState(() {
-      index = widget.images.indexOf(widget.image);
-    });
+    controller = new PageController(initialPage: ind);
   }
 
   @override
@@ -30,19 +26,13 @@ class _ImageViewState extends State<ImageView> {
       child: Scaffold(
           body: Stack(
         children: [
-          Center(
-            child: CarouselSlider(
-              options: CarouselOptions(
-                  autoPlay: false,
-                  initialPage: index,
-                  height: MediaQuery.of(context).size.height / 1.2,
-                  autoPlayAnimationDuration: Duration(milliseconds: 100)),
-              items: widget.images
-                  .map((item) => Image.network(item,
-                      fit: BoxFit.fill,
-                      width: MediaQuery.of(context).size.width))
-                  .toList(),
-            ),
+          PageView.builder(
+            controller: controller,
+            itemCount: widget.images.length,
+            itemBuilder: (context, position) {
+              return Image.network(widget.images[position],
+                  fit: BoxFit.fill, width: MediaQuery.of(context).size.width);
+            },
           ),
           Positioned(
             top: MediaQuery.of(context).padding.top + 15,

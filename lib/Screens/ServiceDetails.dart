@@ -1,8 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hayt_buyer/Common/AppServices.dart';
+import 'package:hayt_buyer/Common/CartDBHelper.dart';
 import 'package:hayt_buyer/Common/Constants.dart' as cnst;
 import 'package:hayt_buyer/Screens/ImageView.dart';
+import 'package:hayt_buyer/Screens/NewConversation.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceDetails extends StatefulWidget {
   var _services;
@@ -12,10 +17,61 @@ class ServiceDetails extends StatefulWidget {
 }
 
 class _ServiceDetailsState extends State<ServiceDetails> {
+  final _cartDBHelper = CartDBHelper.instance;
   List<String> imgList = [];
+  String userId = "";
+  ProgressDialog pr;
+  String title = "Service Details";
   @override
   void initState() {
+    pr = ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: false);
+    pr.style(message: "Please wait..");
     _setImages();
+    _getLocal();
+    // _setData();
+  }
+
+  _setData() {
+    AppServices.Transalate("Service Details").then((data) async {
+      setState(() {
+        title = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+  }
+
+  showMsg(String msg) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Hayt Buyer"),
+          content: new Text(msg),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text(
+                "Close",
+                style: TextStyle(color: cnst.appPrimaryMaterialColor),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _getLocal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString(cnst.Session.id);
+    });
   }
 
   _setImages() {
@@ -34,7 +90,7 @@ class _ServiceDetailsState extends State<ServiceDetails> {
       },
       child: Scaffold(
           appBar: AppBar(
-            title: Text("Service Details"),
+            title: Text("${title}"),
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () {
@@ -202,6 +258,36 @@ class _ServiceDetailsState extends State<ServiceDetails> {
                   ),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NewConversation(
+                                    userId, widget._services["sellerid"])));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 30),
+                        child: Container(
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle, color: Colors.grey),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.comment,
+                                color: Colors.white,
+                              ),
+                            )),
+                      ),
+                    ),
+                  ],
+                ),
+              )
             ],
           )),
     );

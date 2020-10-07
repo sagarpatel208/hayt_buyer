@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 const String API_URL = "http://haytadmin.thecompletesoftech.com/index.php/API/";
 const String INR = "₹";
+String NoData = "";
+String SomethingWrong = "";
+String NoInternet = "";
 Map<int, Color> appPrimaryColors = {
   50: Color.fromRGBO(27, 9, 84, .1),
   100: Color.fromRGBO(27, 9, 84, .2),
@@ -26,8 +29,8 @@ class Session {
   static const String dob = "dob";
   static const String phone = "phone";
   static const String email = "email";
+  static const String city = "city";
   static const String password = "password";
   static const String status = "status";
-  static const String lagunage = "language";
-  static const String setLagunage = "setLagunage";
+  static const String language = "language";
 }

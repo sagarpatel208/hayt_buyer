@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:hayt_buyer/Common/ClassList.dart';
 import 'package:hayt_buyer/Common/Constants.dart';
+import 'package:hayt_buyer/Common/Constants.dart' as cnst;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:translator/translator.dart';
 
 Dio dio = new Dio();
@@ -80,6 +82,7 @@ class AppServices {
               "phone": jsonResponse['value']["phoneno"],
               "email": jsonResponse['value']["email"],
               "password": jsonResponse['value']["password"],
+              "city_id": jsonResponse['value']["city_id"],
             }
           ];
         }
@@ -672,22 +675,6 @@ class AppServices {
     }
   }
 
-  static Future<SaveDataClass> Transalate(String input) async {
-    print("input: ${input}");
-    final translator = GoogleTranslator();
-    SaveDataClass saveDataClass =
-        new SaveDataClass(message: 'No Data', data: "1");
-    var translation = await translator.translate(input, from: 'en', to: 'ru');
-    print("trns: ${translation.text}, ${translation.runtimeType}");
-    saveDataClass.message = "Success";
-    saveDataClass.data = translation.text.toString();
-
-    //String trans = translation.text;
-
-    //print("r: ${trans.runtimeType}");
-    return saveDataClass;
-  }
-
   static Future<SaveDataClass> CheckOut(body) async {
     print("body: ${body.toString()}");
     String url = API_URL + 'Checkout/checkoutaddAPI';
@@ -1168,5 +1155,72 @@ class AppServices {
       print("Get Product by Category Error : " + e.toString());
       throw Exception("Something went wrong");
     }
+  }
+
+  static Future<List<CityClass>> GetCity() async {
+    String url = API_URL + 'City/location';
+    print("Get City URL: " + url);
+    try {
+      Response response = await dio.get(url);
+      if (response.statusCode == 200) {
+        List<CityClass> city = [];
+        print("Get City Response: " + response.data);
+        final jsonResponse = json.decode(response.data);
+        CityClassData cityData = new CityClassData.fromJson(jsonResponse);
+        city = cityData.value;
+
+        return city;
+      } else {
+        throw Exception("Something went wrong");
+      }
+    } catch (e) {
+      print("Get City Error : " + e.toString());
+      throw Exception("Something went wrong");
+    }
+  }
+
+  static Future<List> GetAllCity(body) async {
+    print("body: ${body.toString()}");
+    String url = API_URL + 'City/location';
+    print("Get All City URL: ${url}");
+    try {
+      final response = await dio.post(url, data: body);
+      if (response.statusCode == 200) {
+        SaveDataClass saveDataClass =
+            new SaveDataClass(message: 'No Data', data: "1");
+        final jsonResponse = json.decode(response.data);
+        print("Get All City Responce: ${jsonResponse}");
+        saveDataClass.message = jsonResponse['message'];
+        saveDataClass.data = jsonResponse['data'].toString();
+        saveDataClass.value = jsonResponse['value']['all_users'];
+        List list = [];
+        if (jsonResponse['data'].toString() == "0" &&
+            jsonResponse['value']['all_users'].length > 0) {
+          for (int i = 0; i < jsonResponse['value']['all_users'].length; i++) {
+            list.add(jsonResponse['value']['all_users'][i]);
+          }
+          // list = jsonResponse['value']['all_users'];
+        }
+        return list;
+      } else {
+        throw Exception("Something went Wrong");
+      }
+    } catch (e) {
+      print("Get All City Error : " + e.toString());
+      throw Exception("Something went wrong");
+    }
+  }
+
+  static Future<SaveDataClass> Transalate(String input) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String language = prefs.getString(cnst.Session.language);
+    final translator = GoogleTranslator();
+    SaveDataClass saveDataClass =
+        new SaveDataClass(message: 'No Data', data: "1");
+    var translation =
+        await translator.translate(input, from: 'en', to: language);
+    saveDataClass.message = "Success";
+    saveDataClass.data = translation.text.toString();
+    return saveDataClass;
   }
 }

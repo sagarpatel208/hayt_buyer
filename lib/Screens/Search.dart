@@ -16,11 +16,125 @@ class _SearchState extends State<Search> {
   List _shop = [], _product = [], _service = [];
   TextEditingController edtSearch = new TextEditingController();
   ProgressDialog pr;
+  String title = "Title",
+      searchTextBox = "Search anything...",
+      selectOption = "Select Option",
+      searchShop = "Search Shop",
+      searchProduct = "Search Product",
+      searchService = "Search Service";
   @override
   void initState() {
     pr = ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Please wait..");
+    //_setData();
+  }
+
+  _setData() {
+    AppServices.Transalate("Search").then((data) async {
+      setState(() {
+        title = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    AppServices.Transalate("Search anything...").then((data) async {
+      setState(() {
+        searchTextBox = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    AppServices.Transalate("Select Option").then((data) async {
+      setState(() {
+        selectOption = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    AppServices.Transalate("Search Shop").then((data) async {
+      setState(() {
+        searchShop = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    AppServices.Transalate("Search Product").then((data) async {
+      setState(() {
+        searchProduct = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    AppServices.Transalate("Search Service").then((data) async {
+      setState(() {
+        searchService = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+  }
+
+  translateShop(List pr) {
+    for (int i = 0; i < pr.length; i++) {
+      String firstname = "",
+          lastname = "",
+          shopname = "",
+          email = "",
+          phone = "",
+          dob;
+      AppServices.Transalate(pr[i]["firstname"]).then((data) async {
+        firstname = data.data;
+        setState(() {
+          pr[i]["firstname"] = firstname;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["lastname"]).then((data) async {
+        lastname = data.data;
+        setState(() {
+          pr[i]["lastname"] = lastname;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["shopname"]).then((data) async {
+        shopname = data.data;
+        setState(() {
+          pr[i]["shopname"] = shopname;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["dob"]).then((data) async {
+        dob = data.data;
+        setState(() {
+          pr[i]["dob"] = dob;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["phone"]).then((data) async {
+        phone = data.data;
+        setState(() {
+          pr[i]["phone"] = phone;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["email"]).then((data) async {
+        email = data.data;
+        setState(() {
+          pr[i]["email"] = email;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+    }
+    setState(() {
+      _shop = pr;
+    });
   }
 
   _searchShop() async {
@@ -29,25 +143,91 @@ class _SearchState extends State<Search> {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         AppServices.SearchShop(edtSearch.text, {}).then((data) async {
-          pr.hide();
           if (data.data == "0") {
-            setState(() {
-              _shop = data.value;
-            });
+            if (data.value.length > 0) {_shop=data.value;
+             // await translateShop(data.value);
+            } else {
+              setState(() {
+                _shop.clear();
+              });
+            }
           } else {
             setState(() {
               _shop.clear();
             });
           }
+          pr.hide();
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
+  }
+
+  translateProduct(List pr) {
+    for (int i = 0; i < pr.length; i++) {
+      String name = "",
+          placeofproduct = "",
+          city = "",
+          district = "",
+          color = "",
+          description = "";
+      AppServices.Transalate(pr[i]["name"]).then((data) async {
+        name = data.data;
+        setState(() {
+          pr[i]["name"] = name;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["placeofproduct"]).then((data) async {
+        placeofproduct = data.data;
+        setState(() {
+          pr[i]["placeofproduct"] = placeofproduct;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["city"]).then((data) async {
+        city = data.data;
+        setState(() {
+          pr[i]["city"] = city;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["district"]).then((data) async {
+        district = data.data;
+        setState(() {
+          pr[i]["district"] = district;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["color"]).then((data) async {
+        color = data.data;
+        setState(() {
+          pr[i]["color"] = color;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["description"]).then((data) async {
+        description = data.data;
+        setState(() {
+          pr[i]["description"] = description;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+    }
+    setState(() {
+      _product = pr;
+    });
   }
 
   _searchProduct() async {
@@ -56,25 +236,92 @@ class _SearchState extends State<Search> {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         AppServices.SearchProduct(edtSearch.text, {}).then((data) async {
-          pr.hide();
           if (data.data == "0") {
-            setState(() {
-              _product = data.value;
-            });
+            if (data.value.length > 0) {
+              _product=data.value;
+              //await translateProduct(data.value);
+            } else {
+              setState(() {
+                _product.clear();
+              });
+            }
           } else {
             setState(() {
               _product.clear();
             });
           }
+          pr.hide();
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
+  }
+
+  translateService(List pr) {
+    for (int i = 0; i < pr.length; i++) {
+      String name = "",
+          placeofservice = "",
+          city = "",
+          district = "",
+          color = "",
+          description = "";
+      AppServices.Transalate(pr[i]["name"]).then((data) async {
+        name = data.data;
+        setState(() {
+          pr[i]["name"] = name;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["placeofservice"]).then((data) async {
+        placeofservice = data.data;
+        setState(() {
+          pr[i]["placeofservice"] = placeofservice;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["city"]).then((data) async {
+        city = data.data;
+        setState(() {
+          pr[i]["city"] = city;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["district"]).then((data) async {
+        district = data.data;
+        setState(() {
+          pr[i]["district"] = district;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["color"]).then((data) async {
+        color = data.data;
+        setState(() {
+          pr[i]["color"] = color;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["description"]).then((data) async {
+        description = data.data;
+        setState(() {
+          pr[i]["description"] = description;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+    }
+    setState(() {
+      _service = pr;
+    });
   }
 
   _searchService() async {
@@ -85,9 +332,14 @@ class _SearchState extends State<Search> {
         AppServices.SearchService(edtSearch.text, {}).then((data) async {
           pr.hide();
           if (data.data == "0") {
-            setState(() {
-              _service = data.value;
-            });
+            if (data.value.length > 0) {
+              _service=data.value;
+              ///await translateService(data.value);
+            } else {
+              setState(() {
+                _service.clear();
+              });
+            }
           } else {
             setState(() {
               _service.clear();
@@ -95,12 +347,12 @@ class _SearchState extends State<Search> {
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -131,169 +383,178 @@ class _SearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Search"),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/Dashboard', (Route<dynamic> route) => false);
-            },
+    return WillPopScope(
+      onWillPop: () {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            '/Dashboard', (Route<dynamic> route) => false);
+      },
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text("${title}"),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/Dashboard', (Route<dynamic> route) => false);
+              },
+            ),
           ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: new DropdownButton<String>(
-                        items: <String>[
-                          'Select Option',
-                          'Search Shop',
-                          'Search Product',
-                          'Search Service'
-                        ].map((String value) {
-                          return new DropdownMenuItem<String>(
-                            value: value,
-                            child: new Text(value),
-                          );
-                        }).toList(),
-                        value: _selectedOptions,
-                        onChanged: (value) {
-                          setState(() {
-                            _shop = [];
-                            _product = [];
-                            _service = [];
-                            edtSearch.text = "";
-                            _selectedOptions = value;
-                          });
-                        },
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: new DropdownButton<String>(
+                          items: <String>[
+                            'Select Option',
+                            'Search Shop',
+                            'Search Product',
+                            'Search Service'
+                          ].map((String value) {
+                            return new DropdownMenuItem<String>(
+                              value: value,
+                              child: new Text(value),
+                            );
+                          }).toList(),
+                          value: _selectedOptions,
+                          onChanged: (value) {
+                            setState(() {
+                              _shop = [];
+                              _product = [];
+                              _service = [];
+                              edtSearch.text = "";
+                              _selectedOptions = value;
+                            });
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      textAlign: TextAlign.start,
-                      keyboardType: TextInputType.emailAddress,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18.0,
-                      ),
-                      cursorColor: cnst.appPrimaryMaterialColor,
-                      controller: edtSearch,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) {
-                        FocusScope.of(context).unfocus();
-                      },
-                      decoration: InputDecoration(
-                        hintText: "Search anything",
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Colors.grey.shade100, width: 0.1),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                        hintStyle: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 15,
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        textAlign: TextAlign.start,
+                        keyboardType: TextInputType.emailAddress,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18.0,
+                        ),
+                        cursorColor: cnst.appPrimaryMaterialColor,
+                        controller: edtSearch,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) {
+                          FocusScope.of(context).unfocus();
+                        },
+                        decoration: InputDecoration(
+                          hintText: "${searchTextBox}",
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Colors.grey.shade100, width: 0.1),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10))),
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 10),
-                  MaterialButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                    elevation: 5.0,
-                    height: 50,
-                    minWidth: 100,
-                    color: cnst.appPrimaryMaterialColor,
-                    child: new Text('Search',
-                        style:
-                            new TextStyle(fontSize: 16.0, color: Colors.white)),
-                    onPressed: () {
-                      if (_selectedOptions == "Select Option") {
-                        Fluttertoast.showToast(
-                            msg: "Select what you want to search...",
-                            textColor: Colors.white,
-                            backgroundColor: Colors.red,
-                            gravity: ToastGravity.BOTTOM,
-                            toastLength: Toast.LENGTH_SHORT);
-                      } else if (_selectedOptions == "Search Shop") {
-                        _searchShop();
-                      } else if (_selectedOptions == "Search Product") {
-                        _searchProduct();
-                      } else if (_selectedOptions == "Search Service") {
-                        _searchService();
-                      }
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Expanded(
-                child: _selectedOptions == "Search Shop"
-                    ? _shop.length > 0
-                        ? ListView.builder(
-                            shrinkWrap: true,
-                            physics: ClampingScrollPhysics(),
-                            itemCount: _shop.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return ShopComponent(_shop[index]);
-                            })
-                        : Center(
-                            child: Text(
-                            "No Shops available",
-                            style:
-                                TextStyle(fontSize: 18, color: Colors.black54),
-                          ))
-                    : _selectedOptions == "Search Product"
-                        ? _product.length > 0
-                            ? ListView.builder(
-                                shrinkWrap: true,
-                                physics: ClampingScrollPhysics(),
-                                itemCount: _product.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return ProductComponent(_product[index]);
-                                })
-                            : Center(
-                                child: Text(
-                                "No Products available",
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.black54),
-                              ))
-                        : _selectedOptions == "Search Service"
-                            ? _service.length > 0
-                                ? ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: ClampingScrollPhysics(),
-                                    itemCount: _service.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return ServiceComponent(_service[index]);
-                                    })
-                                : Center(
-                                    child: Text(
-                                    "No Service available",
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.black54),
-                                  ))
-                            : Text(""),
-              )
-            ],
-          ),
-        ));
+                    SizedBox(width: 10),
+                    MaterialButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
+                      elevation: 5.0,
+                      height: 50,
+                      minWidth: 100,
+                      color: cnst.appPrimaryMaterialColor,
+                      child: new Text('${title}',
+                          style: new TextStyle(
+                              fontSize: 16.0, color: Colors.white)),
+                      onPressed: () {
+                        if (_selectedOptions == "Select Option") {
+                          Fluttertoast.showToast(
+                              msg: "Select what you want to search...",
+                              textColor: Colors.white,
+                              backgroundColor: Colors.red,
+                              gravity: ToastGravity.BOTTOM,
+                              toastLength: Toast.LENGTH_SHORT);
+                        } else if (_selectedOptions == "Search Shop") {
+                          _searchShop();
+                        } else if (_selectedOptions == "Search Product") {
+                          _searchProduct();
+                        } else if (_selectedOptions == "Search Service") {
+                          _searchService();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Expanded(
+                  child: _selectedOptions == "Search Shop"
+                      ? _shop.length > 0
+                          ? ListView.builder(
+                              shrinkWrap: true,
+                              physics: ClampingScrollPhysics(),
+                              itemCount: _shop.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return ShopComponent(_shop[index]);
+                              })
+                          : Center(
+                              child: Text(
+                              "${cnst.NoData}",
+                              style: TextStyle(
+                                  fontSize: 18, color: Colors.black54),
+                            ))
+                      : _selectedOptions == "Search Product"
+                          ? _product.length > 0
+                              ? ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: ClampingScrollPhysics(),
+                                  itemCount: _product.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return ProductComponent(_product[index]);
+                                  })
+                              : Center(
+                                  child: Text(
+                                  "${cnst.NoData}",
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.black54),
+                                ))
+                          : _selectedOptions == "Search Service"
+                              ? _service.length > 0
+                                  ? ListView.builder(
+                                      shrinkWrap: true,
+                                      physics: ClampingScrollPhysics(),
+                                      itemCount: _service.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return ServiceComponent(
+                                            _service[index]);
+                                      })
+                                  : Center(
+                                      child: Text(
+                                      "${cnst.NoData}",
+                                      style: TextStyle(
+                                          fontSize: 18, color: Colors.black54),
+                                    ))
+                              : Text(""),
+                )
+              ],
+            ),
+          )),
+    );
   }
 }
 
@@ -325,7 +586,7 @@ class _ShopComponentState extends State<ShopComponent> {
                     image: widget._shop["logo"],
                     height: 160,
                     width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                   ),
             Padding(
               padding: const EdgeInsets.only(top: 10),
@@ -386,7 +647,8 @@ class _ProductComponentState extends State<ProductComponent> {
         child: Column(
           children: [
             widget._product["picture"] == "" ||
-                    widget._product["picture"] == null
+                    widget._product["picture"] == null ||
+                    widget._product["picture"].length > 0
                 ? Image.asset(
                     "assets/background.png",
                     height: 160,
@@ -395,10 +657,10 @@ class _ProductComponentState extends State<ProductComponent> {
                   )
                 : FadeInImage.assetNetwork(
                     placeholder: "assets/background.png",
-                    image: widget._product["picture"],
+                    image: widget._product["picture"]["images"][0],
                     height: 160,
                     width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                   ),
             Padding(
               padding: const EdgeInsets.only(top: 10),
@@ -452,7 +714,8 @@ class _ServiceComponentState extends State<ServiceComponent> {
         child: Column(
           children: [
             widget._service["picture"] == "" ||
-                    widget._service["picture"] == null
+                    widget._service["picture"] == null ||
+                    widget._service["picture"].length > 0
                 ? Image.asset(
                     "assets/background.png",
                     height: 160,
@@ -461,10 +724,10 @@ class _ServiceComponentState extends State<ServiceComponent> {
                   )
                 : FadeInImage.assetNetwork(
                     placeholder: "assets/background.png",
-                    image: widget._service["picture"],
+                    image: widget._service["picture"]["images"][0],
                     height: 160,
                     width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                   ),
             Padding(
               padding: const EdgeInsets.only(top: 10),

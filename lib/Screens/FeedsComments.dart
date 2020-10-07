@@ -69,7 +69,7 @@ class _FeedsCommentsState extends State<FeedsComments> {
             isLoading = false;
           });
 
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -77,7 +77,7 @@ class _FeedsCommentsState extends State<FeedsComments> {
         isLoading = false;
       });
 
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -104,18 +104,19 @@ class _FeedsCommentsState extends State<FeedsComments> {
                 gravity: ToastGravity.BOTTOM,
                 toastLength: Toast.LENGTH_SHORT);
             widget.onChange();
-            Navigator.pop(context);
+            edtComment.text = "";
+            _getFeedComments();
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -263,7 +264,7 @@ class _feedCommentListComponentsState extends State<FeedsCommentComponents> {
                     widget._feedComment['image'],
                     height: 45,
                     width: 45,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                   ),
                 ),
           Padding(

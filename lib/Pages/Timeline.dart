@@ -39,7 +39,7 @@ class _TimelineState extends State<Timeline> {
               //_feeds = data.value;
             });
             for (int i = 0; i < data.value.length; i++) {
-              if (data.value[i]["status"] == "0") {
+              if (data.value[i]["status"] == "1") {
                 _feeds.add(data.value[i]);
               }
             }
@@ -54,7 +54,7 @@ class _TimelineState extends State<Timeline> {
             isLoading = false;
             _feeds.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -62,7 +62,7 @@ class _TimelineState extends State<Timeline> {
         isLoading = false;
         _feeds.clear();
       });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -122,7 +122,6 @@ class FeedsComponents extends StatefulWidget {
 }
 
 class _feedsComponentsState extends State<FeedsComponents> {
-  bool isLoading = false;
   ProgressDialog pr;
   @override
   void initState() {
@@ -156,16 +155,16 @@ class _feedsComponentsState extends State<FeedsComponents> {
                 gravity: ToastGravity.BOTTOM,
                 toastLength: Toast.LENGTH_SHORT);
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -190,16 +189,16 @@ class _feedsComponentsState extends State<FeedsComponents> {
                 gravity: ToastGravity.BOTTOM,
                 toastLength: Toast.LENGTH_SHORT);
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -227,16 +226,16 @@ class _feedsComponentsState extends State<FeedsComponents> {
                 gravity: ToastGravity.BOTTOM,
                 toastLength: Toast.LENGTH_SHORT);
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -264,16 +263,16 @@ class _feedsComponentsState extends State<FeedsComponents> {
                 gravity: ToastGravity.BOTTOM,
                 toastLength: Toast.LENGTH_SHORT);
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -394,9 +393,6 @@ class _feedsComponentsState extends State<FeedsComponents> {
               : FadeInImage.assetNetwork(
                   placeholder: "assets/background.png",
                   image: widget._feeds["image"],
-                  height: 180,
-                  width: MediaQuery.of(context).size.width,
-                  fit: BoxFit.cover,
                 ),
           Padding(
             padding: const EdgeInsets.only(left: 15, top: 5),

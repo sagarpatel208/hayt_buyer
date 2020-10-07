@@ -15,16 +15,89 @@ class ProductByCategory extends StatefulWidget {
 
 class _ProductByCategoryState extends State<ProductByCategory> {
   bool isLoading = false;
-  List _vipProducts = [];
-  List<int> _rating = [];
+  List _product = [];
+  String title = "Product by Category";
   int ind = 0;
   @override
   void initState() {
-    getVIPProducts();
     super.initState();
+    getProductByCategory();
+    //_setData();
   }
 
-  getVIPProducts() async {
+  _setData() {
+    AppServices.Transalate("Products by Category").then((data) async {
+      setState(() {
+        title = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+  }
+
+  translate(List pr) {
+    for (int i = 0; i < pr.length; i++) {
+      String name = "",
+          placeofproduct = "",
+          city = "",
+          district = "",
+          color = "",
+          description = "";
+      AppServices.Transalate(pr[i]["name"]).then((data) async {
+        name = data.data;
+        setState(() {
+          pr[i]["name"] = name;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["placeofproduct"]).then((data) async {
+        placeofproduct = data.data;
+        setState(() {
+          pr[i]["placeofproduct"] = placeofproduct;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["city"]).then((data) async {
+        city = data.data;
+        setState(() {
+          pr[i]["city"] = city;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["district"]).then((data) async {
+        district = data.data;
+        setState(() {
+          pr[i]["district"] = district;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["color"]).then((data) async {
+        color = data.data;
+        setState(() {
+          pr[i]["color"] = color;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["description"]).then((data) async {
+        description = data.data;
+        setState(() {
+          pr[i]["description"] = description;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+    }
+    setState(() {
+      _product = pr;
+    });
+  }
+
+  getProductByCategory() async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -38,33 +111,44 @@ class _ProductByCategoryState extends State<ProductByCategory> {
               isLoading = false;
             });
             List service = data.value;
+            //List dt = [];
             for (int i = 0; i < service.length; i++) {
               if (service[i]["status"] != "0") {
-                _vipProducts.add(service[i]);
-                _rating.add(0);
-                //  await getRatings(_vipProducts[i]["id"]);
+                _product.add(service[i]);
+                //dt.add(service[i]);
               }
             }
+            /*if (dt.length > 0) {
+              await translate(dt);
+            } else {
+              setState(() {
+                _product.clear();
+              });
+            }*/
+            setState(() {
+              isLoading = false;
+            });
+            //print("data:::::: ${_product}");
           } else {
             setState(() {
               isLoading = false;
-              _vipProducts.clear();
+              _product.clear();
             });
           }
         }, onError: (e) {
           setState(() {
             isLoading = false;
-            _vipProducts.clear();
+            _product.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       setState(() {
         isLoading = false;
-        _vipProducts.clear();
+        _product.clear();
       });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -97,22 +181,22 @@ class _ProductByCategoryState extends State<ProductByCategory> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Products by Category"),
+        title: Text("${title}"),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : _vipProducts.length > 0
+          : _product.length > 0
               ? GridView.count(
                   crossAxisCount: 2,
-                  children: List.generate(_vipProducts.length, (index) {
-                    // Future<int> r = getRatings(_vipProducts[index]["id"]);
+                  children: List.generate(_product.length, (index) {
+                    // Future<int> r = getRatings(_product[index]["id"]);
                     //print("r:${r}");
                     return _getListItemUI(index);
                   }),
                 )
               : Center(
                   child: Text(
-                  "No Products available",
+                  "${cnst.NoData}",
                   style: TextStyle(fontSize: 18, color: Colors.black54),
                 )),
     );
@@ -121,10 +205,8 @@ class _ProductByCategoryState extends State<ProductByCategory> {
   Widget _getListItemUI(int index) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ItemCard(_vipProducts[index])));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => ItemCard(_product[index])));
       },
       child: Container(
         child: Card(
@@ -136,10 +218,10 @@ class _ProductByCategoryState extends State<ProductByCategory> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               AspectRatio(
-                aspectRatio: 16.0 / 12.0,
-                child: _vipProducts[index]["picture"] == null ||
-                        _vipProducts[index]["picture"] == "" ||
-                        _vipProducts[index]["picture"].length == 0
+                aspectRatio: 16.0 / 11.0,
+                child: _product[index]["picture"] == null ||
+                        _product[index]["picture"] == "" ||
+                        _product[index]["picture"].length == 0
                     ? Image.asset(
                         "assets/background.png",
                         height: 180,
@@ -148,10 +230,10 @@ class _ProductByCategoryState extends State<ProductByCategory> {
                       )
                     : FadeInImage.assetNetwork(
                         placeholder: "assets/background.png",
-                        image: _vipProducts[index]["picture"]["images"][0],
+                        image: _product[index]["picture"]["images"][0],
                         height: 180,
                         width: MediaQuery.of(context).size.width,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                       ),
               ),
               Padding(
@@ -162,8 +244,8 @@ class _ProductByCategoryState extends State<ProductByCategory> {
                     //Text("${trans()}"),
                     //Text("${tr("Sagar")}"),
                     Text(
-                      //_transalate(_vipProducts[index]['name']),
-                      capitalize(_vipProducts[index]['name']),
+                      //_transalate(_product[index]['name']),
+                      capitalize(_product[index]['name']),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style: TextStyle(
@@ -176,7 +258,7 @@ class _ProductByCategoryState extends State<ProductByCategory> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${cnst.INR} ${capitalize(_vipProducts[index]['sellingprice'])}",
+                          "${cnst.INR} ${capitalize(_product[index]['sellingprice'])}",
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: TextStyle(
@@ -188,10 +270,10 @@ class _ProductByCategoryState extends State<ProductByCategory> {
                         Row(
                           children: [
                             Text(
-                              _vipProducts[index]["averageRating"] == null ||
-                                      _vipProducts[index]["averageRating"] == ""
+                              _product[index]["averageRating"] == null ||
+                                      _product[index]["averageRating"] == ""
                                   ? "0"
-                                  : "${double.parse(_vipProducts[index]["averageRating"].toString()).toStringAsFixed(2)} ",
+                                  : "${double.parse(_product[index]["averageRating"].toString()).toStringAsFixed(2)} ",
                               style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.black,

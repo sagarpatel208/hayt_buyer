@@ -7,8 +7,8 @@ import 'package:hayt_buyer/Screens/ItemCard.dart';
 import 'package:strings/strings.dart';
 
 class ShopProducts extends StatefulWidget {
-  var AdminId;
-  ShopProducts(this.AdminId);
+  var sellerId;
+  ShopProducts(this.sellerId);
   @override
   _ShopProductsState createState() => _ShopProductsState();
 }
@@ -16,12 +16,73 @@ class ShopProducts extends StatefulWidget {
 class _ShopProductsState extends State<ShopProducts> {
   bool isLoading = false;
   List _products = [];
-  List<int> _rating = [];
   @override
   void initState() {
     getShopProducts();
 
     super.initState();
+  }
+
+  translate(List pr) {
+    for (int i = 0; i < pr.length; i++) {
+      String name = "",
+          placeofproduct = "",
+          city = "",
+          district = "",
+          color = "",
+          description = "";
+      AppServices.Transalate(pr[i]["name"]).then((data) async {
+        name = data.data;
+        setState(() {
+          pr[i]["name"] = name;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["placeofproduct"]).then((data) async {
+        placeofproduct = data.data;
+        setState(() {
+          pr[i]["placeofproduct"] = placeofproduct;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["city"]).then((data) async {
+        city = data.data;
+        setState(() {
+          pr[i]["city"] = city;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["district"]).then((data) async {
+        district = data.data;
+        setState(() {
+          pr[i]["district"] = district;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["color"]).then((data) async {
+        color = data.data;
+        setState(() {
+          pr[i]["color"] = color;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["description"]).then((data) async {
+        description = data.data;
+        setState(() {
+          pr[i]["description"] = description;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+    }
+    setState(() {
+      _products = pr;
+    });
   }
 
   getShopProducts() async {
@@ -37,13 +98,25 @@ class _ShopProductsState extends State<ShopProducts> {
               isLoading = false;
             });
             List service = data.value;
+            List dt = [];
             for (int i = 0; i < service.length; i++) {
               if (service[i]["sellerid"].toString() ==
-                  widget.AdminId.toString()) {
-                _products.add(service[i]);
-                await getRatings(_products[i]["id"]);
+                  widget.sellerId.toString()) {
+                dt.add(service[i]);
               }
             }
+
+            if (dt.length > 0) {
+              await translate(dt);
+            } else {
+              setState(() {
+                _products.clear();
+              });
+            }
+            setState(() {
+              isLoading = false;
+            });
+            print("data:::::: ${_products}");
           } else {
             setState(() {
               isLoading = false;
@@ -55,7 +128,7 @@ class _ShopProductsState extends State<ShopProducts> {
             isLoading = false;
             _products.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -63,53 +136,7 @@ class _ShopProductsState extends State<ShopProducts> {
         isLoading = false;
         _products.clear();
       });
-      showMsg("No Internet Connection.");
-    }
-  }
-
-  getRatings(String pId) async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        setState(() {
-          isLoading = true;
-        });
-        AppServices.GetProductRatings(pId, {}).then((data) async {
-          if (data.data == "0") {
-            setState(() {
-              isLoading = false;
-            });
-            int rates = 0;
-            int i = 0;
-            for (i = 0; i < data.value.length; i++) {
-              rates = rates + int.parse(data.value[i]["rating"]);
-            }
-            print("rates: ${rates}, ${i}");
-            print("S: ${rates / i}");
-            //int rt = int.parse((rates / i).toString());
-            _rating.add((rates / i)
-                .round()); //_rating.add(int.parse((rates / i).toString()));
-            print("_rating: ${_rating}");
-          } else {
-            setState(() {
-              isLoading = false;
-              _rating.clear();
-            });
-          }
-        }, onError: (e) {
-          setState(() {
-            isLoading = false;
-            _rating.clear();
-          });
-          showMsg("Something went wrong.");
-        });
-      }
-    } on SocketException catch (_) {
-      setState(() {
-        isLoading = false;
-        _rating.clear();
-      });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -187,7 +214,7 @@ class _ShopProductsState extends State<ShopProducts> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               AspectRatio(
-                aspectRatio: 16.0 / 12.0,
+                aspectRatio: 16.0 / 11.0,
                 child: _products[index]["picture"] == null ||
                         _products[index]["picture"] == "" ||
                         _products[index]["picture"].length == 0
@@ -202,7 +229,7 @@ class _ShopProductsState extends State<ShopProducts> {
                         image: _products[index]["picture"]["images"][0],
                         height: 180,
                         width: MediaQuery.of(context).size.width,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                       ),
               ),
               Padding(
@@ -220,15 +247,41 @@ class _ShopProductsState extends State<ShopProducts> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      "${cnst.INR} ${capitalize(_products[index]['sellingprice'])}",
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "${cnst.INR} ${capitalize(_products[index]['sellingprice'])}",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              _products[index]["averageRating"] == null ||
+                                      _products[index]["averageRating"] == ""
+                                  ? "0"
+                                  : "${double.parse(_products[index]["averageRating"].toString()).toStringAsFixed(2)} ",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Image.asset(
+                              "assets/star.png",
+                              height: 13,
+                              width: 13,
+                              color: cnst.appPrimaryMaterialColor,
+                            )
+                          ],
+                        )
+                      ],
                     ),
                   ],
                 ),

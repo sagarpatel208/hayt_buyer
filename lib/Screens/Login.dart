@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,26 +21,65 @@ class _LoginState extends State<Login> {
   TextEditingController edtEmail = new TextEditingController();
   TextEditingController edtPassword = new TextEditingController();
   ProgressDialog pr;
+  StreamSubscription iosSubscription;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  String fcm = "";
   @override
   void initState() {
     pr = ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Please wait..");
-
-    getLocal();
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    var android = new AndroidInitializationSettings('@mipmap/ic_launcher');
+    var iOS = new IOSInitializationSettings();
+    var initSetttings = new InitializationSettings(android, iOS);
+    flutterLocalNotificationsPlugin.initialize(initSetttings);
+    _configureNotification();
   }
 
   getLocal() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String id = prefs.getString(cnst.Session.id);
-
     if (id != null) {
       Navigator.of(context).pushNamedAndRemoveUntil(
           '/Dashboard', (Route<dynamic> route) => false);
     }
   }
 
+  showNotification(String title, String body) async {
+    var android = new AndroidNotificationDetails('com.hayt_buyer',
+        'Hayt Buyer Notification', 'Hayt Notification Description',
+        priority: Priority.High, importance: Importance.Max, playSound: true);
+    var iOS = new IOSNotificationDetails();
+    var platform = new NotificationDetails(android, iOS);
+    await flutterLocalNotificationsPlugin.show(0, '$title', '$body', platform);
+  }
+
+  _configureNotification() async {
+    if (Platform.isIOS) {
+      iosSubscription =
+          _firebaseMessaging.onIosSettingsRegistered.listen((data) async {
+        await _getFCMToken();
+      });
+      _firebaseMessaging
+          .requestNotificationPermissions(IosNotificationSettings());
+    } else {
+      await _getFCMToken();
+    }
+  }
+
+  _getFCMToken() async {
+    _firebaseMessaging.getToken().then((String token) {
+      setState(() {
+        fcm = token;
+      });
+    });
+    await getLocal();
+  }
+
   _login() {
+    print("fcm token: ${fcm}");
     if (edtEmail.text == "") {
       Fluttertoast.showToast(
           msg: "Please enter your email",
@@ -57,11 +99,11 @@ class _LoginState extends State<Login> {
           timeInSecForIosWeb: 1,
           fontSize: 16.0);
     } else {
-      _AdminLogin();
+      _buyerLogin();
     }
   }
 
-  _AdminLogin() async {
+  _buyerLogin() async {
     try {
       pr.show();
       final result = await InternetAddress.lookup('google.com');
@@ -71,6 +113,7 @@ class _LoginState extends State<Login> {
         FormData d = FormData.fromMap({
           "email": edtEmail.text,
           "password": edtPassword.text,
+          "fcm_token": fcm,
         });
 
         AppServices.BuyerLogin(d).then((data) async {
@@ -83,8 +126,9 @@ class _LoginState extends State<Login> {
             prefs.setString(cnst.Session.dob, data.value[0]["dob"]);
             prefs.setString(cnst.Session.phone, data.value[0]["phone"]);
             prefs.setString(cnst.Session.email, data.value[0]["email"]);
+            prefs.setString(cnst.Session.city, data.value[0]["city_id"]);
             prefs.setString(cnst.Session.password, edtPassword.text);
-
+            print("sagar: ${prefs.getString(cnst.Session.city)}");
             Navigator.of(context).pushNamedAndRemoveUntil(
                 '/Dashboard', (Route<dynamic> route) => false);
           } else {
@@ -97,12 +141,12 @@ class _LoginState extends State<Login> {
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 

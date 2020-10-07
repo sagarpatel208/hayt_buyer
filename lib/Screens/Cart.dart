@@ -20,31 +20,107 @@ class _CartState extends State<Cart> {
   bool isLoading = true;
   int total = 0;
   ProgressDialog pr;
+  String title = "Cart", totlaAmount = "Total Amount", checkout = "Checkout";
   @override
   void initState() {
     pr = ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Please wait..");
+    //_setData();
     _query();
+  }
+
+  _setData() {
+    setState(() {
+      isLoading = true;
+    });
+    AppServices.Transalate("Cart").then((data) async {
+      setState(() {
+        title = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    AppServices.Transalate("Totla Amount").then((data) async {
+      setState(() {
+        totlaAmount = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    AppServices.Transalate("Checkout").then((data) async {
+      setState(() {
+        checkout = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    setState(() {
+      isLoading = false;
+    });
+    _query();
+  }
+
+  translate(List pr) {
+    for (int i = 0; i < pr.length; i++) {
+      String name = "", quantity = "", sellingprice = "";
+      AppServices.Transalate(pr[i]["name"]).then((data) async {
+        name = data.data;
+        setState(() {
+          pr[i]["name"] = name;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["quantity"]).then((data) async {
+        quantity = data.data;
+        setState(() {
+          pr[i]["quantity"] = quantity;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["sellingprice"]).then((data) async {
+        sellingprice = data.data;
+        setState(() {
+          pr[i]["sellingprice"] = sellingprice;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+    }
+    setState(() {
+      _cart = pr;
+    });
   }
 
   void _query() async {
     setState(() {
+      isLoading = true;
       _cart = [];
       total = 0;
     });
     final allRows = await dbHelper.queryAllRows();
     print("type: ${allRows.runtimeType}");
+    List dt = [];
     allRows.forEach((row) {
       int amount = int.parse(row["quantity"].toString()) *
           int.parse(row["sellingprice"].toString());
 
       setState(() {
         total += amount;
+        dt.add(row);
         _cart.add(row);
       });
     });
-    print("list: ${_cart}");
+    /* if (dt.length > 0) {
+      await translate(dt);
+    } else {
+      setState(() {
+        _cart.clear();
+      });
+    }
+    print("list: ${_cart}");*/
     setState(() {
       isLoading = false;
     });
@@ -115,21 +191,22 @@ class _CartState extends State<Cart> {
                   gravity: ToastGravity.BOTTOM,
                   toastLength: Toast.LENGTH_SHORT);
             } else {
-              showMsg("Something went wrong.");
+              showMsg("${cnst.SomethingWrong}");
             }
           }, onError: (e) {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           });
         }
-        _deleteAll();
-        Navigator.of(context).pushNamedAndRemoveUntil(
-            '/Dashboard', (Route<dynamic> route) => false);
+
         pr.hide();
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
+    _deleteAll();
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil('/Dashboard', (Route<dynamic> route) => false);
   }
 
   showMsg(String msg) {
@@ -165,7 +242,7 @@ class _CartState extends State<Cart> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Cart"),
+          title: Text("${title}"),
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
@@ -190,7 +267,8 @@ class _CartState extends State<Cart> {
                                 child: Row(
                                   children: [
                                     _cart[index]['picture'] == null ||
-                                            _cart[index]['picture'] == ""
+                                            _cart[index]['picture'] == "" ||
+                                            _cart[index]['picture'].length > 0
                                         ? Image.asset(
                                             "assets/background.png",
                                             height: 50,
@@ -198,7 +276,8 @@ class _CartState extends State<Cart> {
                                             fit: BoxFit.cover,
                                           )
                                         : Image.network(
-                                            _cart[index]['picture'],
+                                            _cart[index]['picture']["images"]
+                                                [0],
                                             height: 50,
                                             width: 50,
                                             fit: BoxFit.fill,
@@ -298,7 +377,7 @@ class _CartState extends State<Cart> {
                             }),
                       ),
                       Text(
-                        "Total Amount: ${total}",
+                        "${totlaAmount}: ${total}",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       )
@@ -306,7 +385,7 @@ class _CartState extends State<Cart> {
                   )
                 : Center(
                     child: Text(
-                    "No Products in Cart",
+                    "${cnst.NoData}",
                     style: TextStyle(fontSize: 18, color: Colors.black54),
                   )),
         bottomNavigationBar: Padding(
@@ -316,7 +395,7 @@ class _CartState extends State<Cart> {
             height: 40,
             minWidth: MediaQuery.of(context).size.width,
             color: cnst.appPrimaryMaterialColor,
-            child: new Text('CHECK OUT',
+            child: new Text('${checkout}',
                 style: new TextStyle(fontSize: 16.0, color: Colors.white)),
             onPressed: () {
               if (_cart.length > 0) {

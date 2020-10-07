@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,6 @@ class MyApp extends StatelessWidget {
   String bodymessage;
   @override
   void initState() {
-    print("!");
     // TODO: implement initState
 
     _firebaseMessaging.configure(
@@ -42,6 +42,7 @@ class MyApp extends StatelessWidget {
         print("onMessage  $message");
         showNotification('$Title', '$bodymessage');
       },
+      onBackgroundMessage: Platform.isIOS ? null : backgroundMessageHandler,
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
       },
@@ -55,13 +56,19 @@ class MyApp extends StatelessWidget {
     var iOS = new IOSInitializationSettings();
     var initSetttings = new InitializationSettings(android, iOS);
     flutterLocalNotificationsPlugin.initialize(initSetttings);
-    print("1");
+  }
+
+  Future<dynamic> backgroundMessageHandler(Map<String, dynamic> message) async {
+    if (message.containsKey('data')) {
+      await showNotification(message['data']['title'], message['data']['body']);
+      return Future<void>.value();
+    }
   }
 
   showNotification(String title, String body) async {
-    var android = new AndroidNotificationDetails(
-        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
-        priority: Priority.High, importance: Importance.Max, playSound: false);
+    var android = new AndroidNotificationDetails('com.hayt_buyer',
+        'Hayt Buyer Notification', 'Hayt Notification Description',
+        priority: Priority.High, importance: Importance.Max, playSound: true);
     var iOS = new IOSNotificationDetails();
     var platform = new NotificationDetails(android, iOS);
     await flutterLocalNotificationsPlugin.show(0, '$title', '$body', platform);

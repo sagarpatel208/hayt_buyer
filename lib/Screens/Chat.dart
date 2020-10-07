@@ -60,7 +60,7 @@ class _ChatState extends State<Chat> {
             isLoading = false;
           });
 
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -68,7 +68,7 @@ class _ChatState extends State<Chat> {
         isLoading = false;
       });
 
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -173,7 +173,7 @@ class _sellerChatListComponentsState extends State<AdminChatListComponents> {
                         widget._Admin['logo'],
                         height: 65,
                         width: 65,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                       ),
                     ),
               Padding(

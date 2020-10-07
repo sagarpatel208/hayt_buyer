@@ -38,49 +38,6 @@ class _AdminChatState extends State<AdminChat> {
     });
   }
 
-  _getUserToBuyerChat() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        //pr.show();
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String id = prefs.getString(cnst.Session.id);
-        FormData data = FormData.fromMap({"userid": id});
-
-        AppServices.GetUsersToAdminChatList(data).then((data) async {
-          setState(() {
-            isLoading = false;
-          });
-          if (data.data == "0") {
-            setState(() {
-              _sellerChatList = data.value;
-            });
-            GetChatMsg();
-          } else {
-            setState(() {
-              isLoading = false;
-            });
-          }
-        }, onError: (e) {
-          setState(() {
-            isLoading = false;
-          });
-
-          showMsg("Something went wrong.");
-        });
-      }
-    } on SocketException catch (_) {
-      setState(() {
-        isLoading = false;
-      });
-
-      showMsg("No Internet Connection.");
-    }
-  }
-
   GetChatMsg() async {
     try {
       setState(() {
@@ -108,7 +65,7 @@ class _AdminChatState extends State<AdminChat> {
             isLoading = false;
           });
 
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -116,7 +73,7 @@ class _AdminChatState extends State<AdminChat> {
         isLoading = false;
       });
 
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -144,16 +101,16 @@ class _AdminChatState extends State<AdminChat> {
             edtMessage.text = "";
             GetChatMsg();
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -253,7 +210,18 @@ class _AdminChatState extends State<AdminChat> {
                                     color: Colors.blue,
                                   ),
                                   onPressed: () {
-                                    _sendMessage();
+                                    if (edtMessage.text == "") {
+                                      Fluttertoast.showToast(
+                                        msg: "Please enter Message",
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.BOTTOM,
+                                        backgroundColor:
+                                            cnst.appPrimaryMaterialColor,
+                                        textColor: Colors.white,
+                                      );
+                                    } else {
+                                      _sendMessage();
+                                    }
                                   },
                                 ),
                                 hintText: "Message",

@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hayt_buyer/Common/AppServices.dart';
 import 'package:hayt_buyer/Common/CartDBHelper.dart';
 import 'package:hayt_buyer/Common/Constants.dart' as cnst;
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Favourite extends StatefulWidget {
@@ -51,7 +52,7 @@ class _FavouriteState extends State<Favourite> {
             isLoading = false;
           });
 
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -59,7 +60,7 @@ class _FavouriteState extends State<Favourite> {
         isLoading = false;
       });
 
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -117,8 +118,17 @@ class FavouriteComponents extends StatefulWidget {
 
 class _FavouriteComponentsState extends State<FavouriteComponents> {
   final _cartDBHelper = CartDBHelper.instance;
+  ProgressDialog pr;
+  @override
+  void initState() {
+    pr = ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: false);
+    pr.style(message: "Please wait..");
+  }
+
   void _insertCart(
       String pid, String name, String sellingPrice, String picture) async {
+    pr.show();
     // row to insert
     Map<String, dynamic> row = {
       CartDBHelper.columnPID: pid,
@@ -135,6 +145,7 @@ class _FavouriteComponentsState extends State<FavouriteComponents> {
         backgroundColor: Colors.grey.shade100,
         gravity: ToastGravity.BOTTOM,
         toastLength: Toast.LENGTH_SHORT);
+    pr.hide();
   }
 
   @override
@@ -143,7 +154,9 @@ class _FavouriteComponentsState extends State<FavouriteComponents> {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          widget._favItem['picture'] == null || widget._favItem['picture'] == ""
+          widget._favItem['picture'] == null ||
+                  widget._favItem['picture'] == "" ||
+                  widget._favItem['picture'].length > 0
               ? Image.asset(
                   "assets/background.png",
                   height: 70,
@@ -151,7 +164,7 @@ class _FavouriteComponentsState extends State<FavouriteComponents> {
                   fit: BoxFit.cover,
                 )
               : Image.network(
-                  widget._favItem['picture'],
+                  widget._favItem['picture']["images"][0],
                   height: 70,
                   width: 70,
                   fit: BoxFit.fill,

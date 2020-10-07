@@ -93,20 +93,82 @@ class _ItemCardState extends State<ItemCard> {
                 backgroundColor: Colors.grey.shade100,
                 gravity: ToastGravity.BOTTOM,
                 toastLength: Toast.LENGTH_SHORT);
-            /* Navigator.of(context).pushNamedAndRemoveUntil(
-                '/Dashboard', (Route<dynamic> route) => false);*/
+            /*Navigator.of(context).pushNamedAndRemoveUntil(
+          '/Dashboard', (Route<dynamic> route) => false);*/
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
+  }
+
+  translate(List pr) {
+    for (int i = 0; i < pr.length; i++) {
+      String name = "",
+          placeofproduct = "",
+          city = "",
+          district = "",
+          color = "",
+          description = "";
+      AppServices.Transalate(pr[i]["name"]).then((data) async {
+        name = data.data;
+        setState(() {
+          pr[i]["name"] = name;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["placeofproduct"]).then((data) async {
+        placeofproduct = data.data;
+        setState(() {
+          pr[i]["placeofproduct"] = placeofproduct;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["city"]).then((data) async {
+        city = data.data;
+        setState(() {
+          pr[i]["city"] = city;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["district"]).then((data) async {
+        district = data.data;
+        setState(() {
+          pr[i]["district"] = district;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["color"]).then((data) async {
+        color = data.data;
+        setState(() {
+          pr[i]["color"] = color;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+      AppServices.Transalate(pr[i]["description"]).then((data) async {
+        description = data.data;
+        setState(() {
+          pr[i]["description"] = description;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+    }
+    setState(() {
+      relatedProducts = pr;
+    });
   }
 
   getRelatedProducts() async {
@@ -120,8 +182,8 @@ class _ItemCardState extends State<ItemCard> {
             (data) async {
           if (data.data == "0") {
             setState(() {
-              isLoading = false;
               relatedProducts = data.value;
+              isLoading = false;
             });
           } else {
             setState(() {
@@ -134,7 +196,7 @@ class _ItemCardState extends State<ItemCard> {
             isLoading = false;
             relatedProducts.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -142,7 +204,7 @@ class _ItemCardState extends State<ItemCard> {
         isLoading = false;
         relatedProducts.clear();
       });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -179,94 +241,89 @@ class _ItemCardState extends State<ItemCard> {
             MaterialPageRoute(
                 builder: (context) => ItemCard(relatedProducts[index])));
       },
-      child: Container(
-        child: Card(
-          elevation: 1.0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              AspectRatio(
-                aspectRatio: 16.0 / 12.0,
-                child: relatedProducts[index]["picture"] == null ||
-                        relatedProducts[index]["picture"] == "" ||
-                        relatedProducts[index]["picture"].length == 0
-                    ? Image.asset(
-                        "assets/background.png",
-                        height: 180,
-                        width: MediaQuery.of(context).size.width,
-                        fit: BoxFit.cover,
-                      )
-                    : FadeInImage.assetNetwork(
-                        placeholder: "assets/background.png",
-                        image: relatedProducts[index]["picture"]["images"][0],
-                        height: 180,
-                        width: MediaQuery.of(context).size.width,
-                        fit: BoxFit.cover,
-                      ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    //Text("${trans()}"),
-                    //Text("${tr("Sagar")}"),
-                    Text(
-                      //_transalate(relatedProducts[index]['name']),
-                      capitalize(relatedProducts[index]['name']),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
+      child: Card(
+        elevation: 3.0,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            AspectRatio(
+              aspectRatio: 16.0 / 11.0,
+              child: relatedProducts[index]["picture"] == null ||
+                      relatedProducts[index]["picture"] == "" ||
+                      relatedProducts[index]["picture"].length == 0
+                  ? Image.asset(
+                      "assets/background.png",
+                      height: 180,
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.cover,
+                    )
+                  : FadeInImage.assetNetwork(
+                      placeholder: "assets/background.png",
+                      image: relatedProducts[index]["picture"]["images"][0],
+                      height: 180,
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.fill,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "${cnst.INR} ${capitalize(relatedProducts[index]['sellingprice'])}",
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: TextStyle(
-                            fontSize: 12.0,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  //Text("${trans()}"),
+                  //Text("${tr("Sagar")}"),
+                  Text(
+                    //_transalate(relatedProducts[index]['name']),
+                    capitalize(relatedProducts[index]['name']),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12.0,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "${cnst.INR} ${capitalize(relatedProducts[index]['sellingprice'])}",
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              relatedProducts[index]["averageRating"] == null ||
-                                      relatedProducts[index]["averageRating"] ==
-                                          ""
-                                  ? "0"
-                                  : "${double.parse(relatedProducts[index]["averageRating"].toString()).toStringAsFixed(2)} ",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            relatedProducts[index]["averageRating"] == null ||
+                                    relatedProducts[index]["averageRating"] ==
+                                        ""
+                                ? "0"
+                                : "${double.parse(relatedProducts[index]["averageRating"].toString()).toStringAsFixed(2)} ",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
                             ),
-                            Image.asset(
-                              "assets/star.png",
-                              height: 13,
-                              width: 13,
-                              color: cnst.appPrimaryMaterialColor,
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  ],
-                ),
+                          ),
+                          Image.asset(
+                            "assets/star.png",
+                            height: 13,
+                            width: 13,
+                            color: cnst.appPrimaryMaterialColor,
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -281,7 +338,7 @@ class _ItemCardState extends State<ItemCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    height: 250,
+                    height: 210,
                     width: MediaQuery.of(context).size.width,
                     child: Stack(
                       children: [
@@ -369,7 +426,8 @@ class _ItemCardState extends State<ItemCard> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding:
+                        const EdgeInsets.only(left: 10, right: 10, top: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -458,7 +516,7 @@ class _ItemCardState extends State<ItemCard> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(top: 30),
+                          padding: const EdgeInsets.only(top: 20),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -568,7 +626,7 @@ class _ItemCardState extends State<ItemCard> {
                                 padding:
                                     const EdgeInsets.only(left: 10, top: 10),
                                 child: Text(
-                                  "Relaed Products",
+                                  "Related Products",
                                   style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold),

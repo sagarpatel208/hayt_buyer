@@ -44,14 +44,14 @@ class _SellerProfileState extends State<SellerProfile> {
           setState(() {
             _productProfile.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       setState(() {
         _productProfile.clear();
       });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
     _getServiceProfile();
   }
@@ -78,14 +78,14 @@ class _SellerProfileState extends State<SellerProfile> {
           setState(() {
             _serviceProfile.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       setState(() {
         _serviceProfile.clear();
       });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
     _getFeedProfile();
   }
@@ -114,7 +114,7 @@ class _SellerProfileState extends State<SellerProfile> {
             isLoading = false;
             _feedsProfile.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -122,7 +122,7 @@ class _SellerProfileState extends State<SellerProfile> {
         isLoading = false;
         _feedsProfile.clear();
       });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -257,7 +257,7 @@ class _ProductProfileComponentsState extends State<ProductProfileComponents> {
                   image: widget._product["picture"],
                   height: 160,
                   width: MediaQuery.of(context).size.width,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                 ),
           Container(
             width: MediaQuery.of(context).size.width,
@@ -313,7 +313,7 @@ class _ServiceProfileComponentsState extends State<ServiceProfileComponents> {
                   image: widget._service["picture"],
                   height: 160,
                   width: MediaQuery.of(context).size.width,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                 ),
           Container(
             width: MediaQuery.of(context).size.width,
@@ -376,7 +376,7 @@ class _FeedsProfileComponentsState extends State<FeedsProfileComponents> {
                   image: widget._feeds["image"],
                   height: 180,
                   width: MediaQuery.of(context).size.width,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                 ),
           Padding(
             padding: const EdgeInsets.only(left: 15, top: 5, bottom: 10),

@@ -36,6 +36,7 @@ class _AdminConversationState extends State<AdminConversation> {
       });
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        print("${widget.userId},${widget.adminId}");
         FormData data = FormData.fromMap(
             {"userid": widget.userId, "adminid": widget.adminId});
         AppServices.GetUsertoAdminChatMsg(data).then((data) async {
@@ -57,7 +58,7 @@ class _AdminConversationState extends State<AdminConversation> {
             isLoading = false;
           });
 
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -65,7 +66,7 @@ class _AdminConversationState extends State<AdminConversation> {
         isLoading = false;
       });
 
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -93,16 +94,16 @@ class _AdminConversationState extends State<AdminConversation> {
                 toastLength: Toast.LENGTH_SHORT);
             Navigator.pop(context);
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 

@@ -57,7 +57,7 @@ class _NewConversationState extends State<NewConversation> {
             isLoading = false;
           });
 
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -65,7 +65,7 @@ class _NewConversationState extends State<NewConversation> {
         isLoading = false;
       });
 
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -94,16 +94,16 @@ class _NewConversationState extends State<NewConversation> {
             edtMessage.text = "";
             GetChatMsg();
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -190,7 +190,18 @@ class _NewConversationState extends State<NewConversation> {
                                 color: Colors.blue,
                               ),
                               onPressed: () {
-                                _sendMessage();
+                                if (edtMessage.text == "") {
+                                  Fluttertoast.showToast(
+                                    msg: "Please enter Message",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    backgroundColor:
+                                        cnst.appPrimaryMaterialColor,
+                                    textColor: Colors.white,
+                                  );
+                                } else {
+                                  _sendMessage();
+                                }
                               },
                             ),
                             hintText: "Message",

@@ -15,24 +15,57 @@ class Category extends StatefulWidget {
 class _CategoryState extends State<Category> {
   List _category = [];
   bool isLoading = true;
+  String title = "Category";
   @override
   void initState() {
     getAllCategory();
+    //_setData();
+  }
+
+  _setData() {
+    AppServices.Transalate("Category").then((data) async {
+      setState(() {
+        title = data.data;
+      });
+    }, onError: (e) {
+      showMsg("${cnst.SomethingWrong}");
+    });
+    getAllCategory();
+  }
+
+  translate(List pr) {
+    for (int i = 0; i < pr.length; i++) {
+      String name = "";
+      AppServices.Transalate(pr[i]["name"]).then((data) async {
+        name = data.data;
+        setState(() {
+          pr[i]["name"] = name;
+        });
+      }, onError: (e) {
+        showMsg("${cnst.SomethingWrong}");
+      });
+    }
+    setState(() {
+      _category = pr;
+    });
   }
 
   getAllCategory() async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        setState(() {
-          isLoading = true;
-        });
-
         AppServices.GetAllCategory({}).then((data) async {
           if (data.data == "0") {
+            if (data.value.length > 0) {
+              _category = data.value;
+              //await translate(data.value);
+            } else {
+              setState(() {
+                _category.clear();
+              });
+            }
             setState(() {
               isLoading = false;
-              _category = data.value;
             });
           } else {
             setState(() {
@@ -45,7 +78,7 @@ class _CategoryState extends State<Category> {
             isLoading = false;
             _category.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -53,7 +86,7 @@ class _CategoryState extends State<Category> {
         isLoading = false;
         _category.clear();
       });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -63,7 +96,7 @@ class _CategoryState extends State<Category> {
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text("Hayt Admin"),
+          title: new Text("Hayt Buyer"),
           content: new Text(msg),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
@@ -86,7 +119,7 @@ class _CategoryState extends State<Category> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Category"),
+          title: Text("${title}"),
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
@@ -106,7 +139,7 @@ class _CategoryState extends State<Category> {
                       return CategoryComponents(_category[index]);
                     })
                 : Center(
-                    child: Text("No category available",
+                    child: Text("${cnst.NoData}",
                         style: TextStyle(fontSize: 20, color: Colors.black54)),
                   ));
   }
@@ -145,16 +178,16 @@ class _CategoryComponentsState extends State<CategoryComponents> {
                 toastLength: Toast.LENGTH_SHORT);
             Navigator.pushReplacementNamed(context, '/Category');
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -211,8 +244,12 @@ class _CategoryComponentsState extends State<CategoryComponents> {
                           width: 60,
                           fit: BoxFit.cover,
                         )
-                      : Image.network(widget._category["image"],
-                          fit: BoxFit.cover, height: 60, width: 60),
+                      : Image.network(
+                          widget._category["image"],
+                          fit: BoxFit.fill,
+                          height: 60,
+                          width: 60,
+                        ),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(left: 10, right: 10),

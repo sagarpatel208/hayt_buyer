@@ -44,7 +44,7 @@ class _OrderHistoryState extends State<OrderHistory> {
             isLoading = false;
             _orderHistory.clear();
           });
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
@@ -52,7 +52,7 @@ class _OrderHistoryState extends State<OrderHistory> {
         isLoading = false;
         _orderHistory.clear();
       });
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -123,11 +123,13 @@ class _OrderComponentsState extends State<OrderComponents> {
           padding: const EdgeInsets.all(5),
           child: Row(
             children: [
-              widget._order['picture'] == null || widget._order['picture'] == ""
+              widget._order['picture'] == null ||
+                      widget._order['picture'] == "" ||
+                      widget._order['picture'].length > 0
                   ? Image.asset("assets/background.png",
                       height: 65, width: 65, fit: BoxFit.cover)
                   : Image.network(
-                      widget._order['picture'],
+                      widget._order['picture']["images"][0],
                       height: 65,
                       width: 65,
                       fit: BoxFit.fill,

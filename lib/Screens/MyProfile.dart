@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hayt_buyer/Common/AppServices.dart';
+import 'package:hayt_buyer/Common/ClassList.dart';
 import 'package:hayt_buyer/Common/Constants.dart' as cnst;
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,7 +18,10 @@ class MyProfile extends StatefulWidget {
 }
 
 class _MyProfileState extends State<MyProfile> {
+  static List<City> city = new List<City>();
   bool isLoading = true;
+  AutoCompleteTextField searchTextField;
+  GlobalKey<AutoCompleteTextFieldState<City>> key = new GlobalKey();
   TextEditingController edtName = new TextEditingController();
   TextEditingController edtSurname = new TextEditingController();
   TextEditingController edtEmail = new TextEditingController();
@@ -25,7 +30,8 @@ class _MyProfileState extends State<MyProfile> {
   TextEditingController edtPassword = new TextEditingController();
   TextEditingController edtConfirmPassword = new TextEditingController();
   String dob = "";
-
+  String selectedCity = "", selectedCityId = "";
+  List<String> _city = [];
   ProgressDialog pr;
   @override
   void initState() {
@@ -33,6 +39,7 @@ class _MyProfileState extends State<MyProfile> {
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Please wait..");
     getLocal();
+    _getAllCity();
   }
 
   getLocal() async {
@@ -45,12 +52,86 @@ class _MyProfileState extends State<MyProfile> {
     edtSurname.text = prefs.getString(cnst.Session.lastname);
     edtEmail.text = prefs.getString(cnst.Session.email);
     edtPhone.text = prefs.getString(cnst.Session.phone);
-    dob = prefs.getString(cnst.Session.dob);
     edtPassword.text = prefs.getString(cnst.Session.password);
     edtConfirmPassword.text = prefs.getString(cnst.Session.password);
     setState(() {
+      dob = prefs.getString(cnst.Session.dob);
+      print("SS: ${prefs.getString(cnst.Session.city)}");
+      if (prefs.getString(cnst.Session.city) == null ||
+          prefs.getString(cnst.Session.city) == "") {
+        setState(() {
+          selectedCity = "";
+        });
+        print("1");
+      } else {
+        bool isNumber = true;
+        try {
+          var value = double.parse(prefs.getString(cnst.Session.city));
+        } on FormatException {
+          isNumber = false;
+        }
+        if (isNumber) {
+          setState(() {
+            selectedCity = "";
+          });
+        } else {
+          setState(() {
+            selectedCity = prefs.getString(cnst.Session.city);
+          });
+        }
+        print("city ${prefs.getString(cnst.Session.city)}");
+      }
       isLoading = false;
     });
+  }
+
+  _getAllCity() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          isLoading = true;
+        });
+        FormData data = FormData.fromMap({"city": "a"});
+        AppServices.GetAllCity({}).then((data) async {
+          if (data.length > 0) {
+            city = loadCity(data);
+
+            for (int i = 0; i < city.length; i++) {
+              print("city: ${city[i].id},${city[i].name}");
+            }
+            setState(() {
+              isLoading = false;
+            });
+          } else {
+            setState(() {
+              isLoading = false;
+            });
+          }
+        }, onError: (e) {
+          setState(() {
+            isLoading = false;
+          });
+          showMsg("${cnst.SomethingWrong}");
+        });
+      }
+    } on SocketException catch (_) {
+      setState(() {
+        isLoading = false;
+      });
+      showMsg("${cnst.NoInternet}");
+    }
+  }
+
+  static List<City> loadCity(cityList) {
+    return cityList.map<City>((json) => City.fromJson(json)).toList();
+  }
+
+  Widget row(City city) {
+    return Text(
+      city.name,
+      style: TextStyle(fontSize: 16.0),
+    );
   }
 
   setDob(String Date) {
@@ -144,6 +225,15 @@ class _MyProfileState extends State<MyProfile> {
           textColor: Colors.black,
           timeInSecForIosWeb: 1,
           fontSize: 16.0);
+    } else if (selectedCity == "" || selectedCity == null) {
+      Fluttertoast.showToast(
+          msg: "Please select City",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.grey.shade300,
+          textColor: Colors.black,
+          timeInSecForIosWeb: 1,
+          fontSize: 16.0);
     } else if (edtPassword.text == "") {
       Fluttertoast.showToast(
           msg: "Please enter your Password",
@@ -191,6 +281,7 @@ class _MyProfileState extends State<MyProfile> {
           "phoneno": edtPhone.text,
           "email": edtEmail.text,
           "password": edtPassword.text,
+          "city_id": selectedCity
         });
 
         AppServices.BuyreUpdateProfile(id, d).then((data) async {
@@ -201,27 +292,27 @@ class _MyProfileState extends State<MyProfile> {
             prefs.setString(cnst.Session.lastname, edtSurname.text);
             prefs.setString(cnst.Session.email, edtEmail.text);
             prefs.setString(cnst.Session.phone, edtPhone.text);
-            prefs.setString(cnst.Session.dob, edtDOB.text);
+            prefs.setString(cnst.Session.dob, dob);
             prefs.setString(cnst.Session.password, edtPassword.text);
+            prefs.setString(cnst.Session.city, selectedCity);
             Fluttertoast.showToast(
                 msg: "Profile updated successfully!!!",
                 textColor: cnst.appPrimaryMaterialColor[700],
                 backgroundColor: Colors.grey.shade100,
                 gravity: ToastGravity.BOTTOM,
                 toastLength: Toast.LENGTH_SHORT);
-            Navigator.of(context).pushNamedAndRemoveUntil(
-                '/Dashboard', (Route<dynamic> route) => false);
+            Navigator.pop(context);
           } else {
-            showMsg("Something went wrong.");
+            showMsg("${cnst.SomethingWrong}");
           }
         }, onError: (e) {
           pr.hide();
-          showMsg("Something went wrong.");
+          showMsg("${cnst.SomethingWrong}");
         });
       }
     } on SocketException catch (_) {
       pr.hide();
-      showMsg("No Internet Connection.");
+      showMsg("${cnst.NoInternet}");
     }
   }
 
@@ -453,6 +544,75 @@ class _MyProfileState extends State<MyProfile> {
                           ),
                         ),
                         SizedBox(height: 7),
+                        searchTextField = AutoCompleteTextField<City>(
+                          key: key,
+                          clearOnSubmit: false,
+                          suggestions: city,
+                          style: TextStyle(color: Colors.black, fontSize: 16.0),
+                          decoration: InputDecoration(
+                            contentPadding:
+                                EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 20.0),
+                            hintText: selectedCity == "" || selectedCity == null
+                                ? "Select City"
+                                : selectedCity,
+                            hintStyle: TextStyle(color: Colors.black),
+                          ),
+                          itemFilter: (item, query) {
+                            return item.name
+                                .toLowerCase()
+                                .startsWith(query.toLowerCase());
+                          },
+                          itemSorter: (a, b) {
+                            return a.name.compareTo(b.name);
+                          },
+                          itemSubmitted: (item) {
+                            setState(() {
+                              searchTextField.textField.controller.text =
+                                  item.name;
+                              selectedCity = item.name;
+                              selectedCityId = item.id;
+                            });
+                          },
+                          itemBuilder: (context, item) {
+                            return row(item);
+                          },
+                        ),
+                        /*Container(
+                          margin: EdgeInsets.only(top: 10),
+                          padding: EdgeInsets.only(left: 20),
+                          height: 55,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                color: Colors.grey,
+                                style: BorderStyle.solid,
+                                width: 1),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              items: <String>[
+                                'Select City',
+                                'Surat',
+                                'Delhi',
+                                'Benguluru',
+                                'Mumbai',
+                                'Vadodara',
+                              ].map((String value) {
+                                return new DropdownMenuItem<String>(
+                                  value: value,
+                                  child: new Text(value),
+                                );
+                              }).toList(),
+                              value: selectedCity,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCity = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ),*/
                         SizedBox(
                           height: 7,
                         ),
